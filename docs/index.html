@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>critpower</title>
+<meta name="description" content="Critical power and critical speed in Python, from lab tests or field data: five models, 3-min all-out test, mean-maximal curves, W' balance and a designed PDF report.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="projet.css">
+</head>
+<body>
+<header class="barre"><div class="enveloppe">
+  <a class="marque" href="https://clement0242.github.io"><b>CV</b> Clément Verdier</a>
+  <nav aria-label="Sections">
+    <a href="#start">Start</a><a href="#report">Report</a><a href="#field">Field data</a><a href="#wbal">W′ balance</a><a href="#tests">Tests</a>
+  </nav>
+</div></header>
+
+<main>
+<div class="tete"><div class="enveloppe">
+  <p class="surtitre">Python library · endurance · sport science</p>
+  <h1>Critical power and speed, <em>with a report</em></h1>
+  <p class="chapeau">From a few maximal efforts, a 3-minute all-out test or a season of training files to critical power
+  (CP, W′) or critical speed (CS, D′): five published models compared, the W′ balance of a session, and a designed
+  PDF report ready to hand to an athlete or a coach.</p>
+  <div class="boutons">
+    <a class="bouton" href="https://github.com/Clement0242/critpower">Code on GitHub</a>
+    <a class="bouton creux" href="example_power_en.pdf">Example report</a>
+  </div>
+  <div class="chiffres">
+    <div><b>5</b><span>models: hyperbolic, two linear forms, 3-parameter, omni-domain</span></div>
+    <div><b>276</b><span>real GNSS sessions of a footballer in the example data</span></div>
+    <div><b>14</b><span>tests, run on Python 3.10, 3.12 and 3.13 on every push</span></div>
+    <div><b>2</b><span>dependencies: NumPy and SciPy (the report is optional)</span></div>
+  </div>
+</div></div>
+
+<section id="start"><div class="enveloppe">
+  <p class="etiq">Get started</p>
+  <h2>Four efforts, one line</h2>
+<pre><code>pip install "critpower[report] @ git+https://github.com/Clement0242/critpower"
+
+import critpower as cp
+fit = cp.fit_critical([150, 270, 480, 840], [413, 355, 321, 301])   # durations (s), mean power (W)
+print(fit.summary())                    # CP 277.9 W (SEE 0.5 %), W' 20.4 kJ (SEE 1.7 %)
+models = cp.compare_models([150, 270, 480, 840], [413, 355, 321, 301])</code></pre>
+  <div class="prose"><p>Pass <code>kind="speed"</code> for running: the same relationship gives critical speed (m/s) and D′ (m),
+  with pace and race-time predictions. Every parameter comes with its standard error; <code>compare_models</code> ranks
+  the fits and refuses to crown a model that has as many parameters as data points.</p></div>
+</div></section>
+
+<section id="report"><div class="enveloppe">
+  <p class="etiq">PDF report</p>
+  <h2>Three pages an athlete can read</h2>
+  <div class="prose"><p><code>critical_report</code> writes an A4 report: key figures, an automatic reading in plain
+  words (including whether the estimate is precise enough), the intensity-duration curve, the work-time line, the table of
+  models, predictions (sustainable intensity per duration, time limit per target), the W′ balance of a session, the
+  method and the references. French or English; your organisation's name and logo are options, nothing is added by default.</p></div>
+  <div class="boutons">
+    <a class="bouton creux" href="example_power_en.pdf">Critical power (EN)</a>
+    <a class="bouton creux" href="example_power_fr.pdf">Puissance critique (FR)</a>
+    <a class="bouton creux" href="example_speed_en.pdf">Critical speed, field data (EN)</a>
+    <a class="bouton creux" href="example_speed_fr.pdf">Vitesse critique, terrain (FR)</a>
+  </div>
+</div></section>
+
+<section id="field"><div class="enveloppe">
+  <p class="etiq">Field data</p>
+  <h2>A season of GPS, no test needed</h2>
+  <div class="prose"><p><code>mean_maximal</code> reduces a recording to its best rolling mean for each duration (a match at
+  10 Hz in milliseconds); <code>best_of</code> keeps the best of all sessions; <code>fit_field</code> fits the 2–20 min
+  window. The example is real: one player of an elite women's football team, 276 sessions from the open SoccerMon
+  dataset, streamed from the archives without downloading them.</p></div>
+  <figure><div class="feuille"><img src="soccermon_curves.png" alt="Mean-maximal speed against duration for 276 football sessions (grey), the best of the season (red) and a hyperbolic fit between 2 and 20 minutes, critical speed 2.45 m/s." width="1253" height="510" loading="lazy"></div>
+  <figcaption>Each grey line is a session; the red curve is the best of the season, and the fit gives a critical speed of 2.45 m/s.</figcaption></figure>
+  <div class="constat"><p>Field data give a lower bound, and the model choice matters.</p>
+  <p>Football is intermittent: nobody runs 20 minutes flat out in a match. On this player, critical speed is 2.25 m/s with
+  the linear work-time model and 2.45 m/s with the hyperbolic one; the report shows both instead of hiding the spread.
+  Eight days with GNSS faults (speed pinned at 10 m/s for minutes) are left out.</p></div>
+</div></section>
+
+<section id="wbal"><div class="enveloppe">
+  <p class="etiq">W′ balance</p>
+  <h2>What is left in the tank, second by second</h2>
+  <div class="prose"><p>Above CP, W′ drains by the excess; below it, it refills. Two published models: the
+  <strong>differential</strong> one (Clarke &amp; Skiba 2013, Skiba et al. 2014), unit-agnostic, and the
+  <strong>integral</strong> one (Skiba et al. 2012), whose recovery constant was established in cycling.</p></div>
+  <figure><div class="feuille"><img src="wbal_models.png" alt="W' balance during five 2-minute intervals for the differential and integral models." width="1273" height="476" loading="lazy"></div>
+  <figcaption>Five 2-minute intervals at 350 W for a rider with CP 278 W: the two models disagree on recovery, not on depletion.</figcaption></figure>
+</div></section>
+
+<section id="tests"><div class="enveloppe">
+  <p class="etiq">Tests</p>
+  <h2>What is checked</h2>
+  <div class="tableau"><table>
+    <thead><tr><th>Check</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Exact recovery of CP and W′ by the hyperbolic and both linear models; of Pmax (3-parameter) and the long-duration decline (omni)</td><td><span class="pastille ok">≤ 0.1 %</span></td></tr>
+      <tr><td>Hyperbolic fit and intensity-1/time regression minimise the same residuals: same parameters, same SEE</td><td><span class="pastille ok">identical</span></td></tr>
+      <tr><td>3-min all-out test on a known exponential decay to CP</td><td><span class="pastille ok">CP ± 1 W</span></td></tr>
+      <tr><td>Time to exhaustion is the exact inverse of the prediction; infinite below CP</td><td><span class="pastille ok">exact</span></td></tr>
+      <tr><td>W′ balance: linear depletion above CP, never above W′, integral time constant</td><td><span class="pastille ok">exact</span></td></tr>
+      <tr><td>Reports in French and English, lab and field</td><td><span class="pastille ok">rendered</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose"><p>References: Monod &amp; Scherrer 1965, Moritani et al. 1981, Hill 1993, Morton 1996, Vanhatalo et al. 2007,
+  Pettitt et al. 2012, Skiba et al. 2012 and 2014, Clarke &amp; Skiba 2013, Jones &amp; Vanhatalo 2017, Muniz-Pumares et al. 2019,
+  Puchowicz, Baker &amp; Clarke 2020, Smyth &amp; Muniz-Pumares 2020. Data: SoccerMon (Midoglu et al. 2024, CC-BY 4.0).</p></div>
+</div></section>
+</main>
+
+<footer><div class="enveloppe">
+  <a href="https://clement0242.github.io">Clément Verdier</a> · data engineer &amp; sport scientist ·
+  <a href="https://github.com/Clement0242/critpower">source</a> · MIT licence
+</div></footer>
+</body>
+</html>

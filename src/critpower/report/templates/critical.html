@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section>
+  <div class="titre-section">{{ outlined_number(1) | safe }}<span class="triangle"></span><h2>{{ L.summary }}</h2><span class="filet"></span></div>
+  <div class="chiffres">
+    {% for c in tiles %}
+    <div class="chiffre{% if c.accent %} accent{% endif %}"><div class="val">{{ c.val }}{% if c.unit %}<small>{{ c.unit }}</small>{% endif %}</div><div class="lab">{{ c.lab }}</div><div class="sub">{{ c.sub }}</div></div>
+    {% endfor %}
+  </div>
+  <div class="encadre">
+    <div class="etiquette">{{ L.reading }}</div>
+    {% for line in reading %}<p>{{ line | safe }}</p>{% endfor %}
+  </div>
+</section>
+
+<section>
+  <div class="titre-section">{{ outlined_number(2) | safe }}<span class="triangle"></span><h2>{{ L.curve }}</h2><span class="filet"></span></div>
+  <figure><img src="{{ fig_curve }}" alt=""><figcaption>{{ L.cap_field if field else L.cap_curve }}</figcaption></figure>
+  <div class="deux">
+    <figure><img src="{{ fig_work }}" alt=""><figcaption>{{ L.cap_work }}</figcaption></figure>
+    <div>
+      <h3><span class="badge">2.1</span>{{ L.efforts }}</h3>
+      <table>
+        <tr><th>{{ L.duration }}</th><th class="num">{{ L.measured }}</th><th class="num">{{ L.model }}</th><th class="num">{{ L.residual }}</th></tr>
+        {% for d, m, p, r in efforts %}<tr><td>{{ d }}</td><td class="num">{{ m }}</td><td class="num">{{ p }}</td><td class="num">{{ r }}</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</section>
+
+{% if models %}
+<section>
+  <div class="titre-section">{{ outlined_number(3) | safe }}<span class="triangle"></span><h2>{{ L.models }}</h2><span class="filet"></span></div>
+  <table>
+    <tr><th>{{ L.model }}</th><th class="num">{{ 'CP (W)' if fit.kind == 'power' else 'CS (m/s)' }}</th><th class="num">{{ "W′ (kJ)" if fit.kind == 'power' else "D′ (m)" }}</th><th class="num">max</th><th class="num">SEE {{ 'CP' if fit.kind == 'power' else 'CS' }}</th><th class="num">SEE {{ "W′" if fit.kind == 'power' else "D′" }}</th><th class="num">R²</th></tr>
+    {% for m in models %}<tr{% if m.best %} class="retenu"{% endif %}><td>{{ m.name }}{% if m.best %} <span class="pastille ok">{{ L.best }}</span>{% endif %}</td><td class="num">{{ m.cp }}</td><td class="num">{{ m.wp }}</td><td class="num">{{ m.pmax }}</td><td class="num">{{ m.see_cp }} %</td><td class="num">{{ m.see_wp }} %</td><td class="num">{{ m.r2 }}</td></tr>{% endfor %}
+  </table>
+</section>
+{% endif %}
+{% set n = 4 if models else 3 %}
+
+<section>
+  <div class="titre-section">{{ outlined_number(n) | safe }}<span class="triangle"></span><h2>{{ L.predictions }}</h2><span class="filet"></span></div>
+  <div class="deux">
+    <div>
+      <h3><span class="badge">{{ n }}.1</span>{{ L.sustainable }}</h3>
+      <table>
+        <tr><th>{{ L.duration }}</th><th class="num">{{ fit.units[0] }}{% if fit.kind == 'speed' %} · min/km{% endif %}</th></tr>
+        {% for d, v in pred_dur %}<tr><td>{{ d }}</td><td class="num">{{ v }}</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div>
+      <h3><span class="badge">{{ n }}.2</span>{{ L.tte }}</h3>
+      <table>
+        <tr><th>{{ L.target }}</th><th class="num">{{ L.tte }}</th></tr>
+        {% for x, t in pred_tte %}<tr><td>{{ x }}</td><td class="num">{{ t }}</td></tr>{% endfor %}
+      </table>
+      {% if pred_dist %}
+      <h3><span class="badge">{{ n }}.3</span>{{ L.distance }}</h3>
+      <table>
+        <tr><th>{{ L.distance }}</th><th class="num">{{ L.time }}</th><th class="num">{{ L.pace }}</th></tr>
+        {% for d, t, p in pred_dist %}<tr><td>{{ d }}</td><td class="num">{{ t }}</td><td class="num">{{ p }}</td></tr>{% endfor %}
+      </table>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% if session %}
+<section>
+  <div class="titre-section">{{ outlined_number(n + 1) | safe }}<span class="triangle"></span><h2>{{ L.session }}</h2><span class="filet"></span></div>
+  <div class="chiffres">
+    {% for c in tiles_s %}
+    <div class="chiffre{% if c.accent %} accent{% endif %}"><div class="val">{{ c.val }}{% if c.unit %}<small>{{ c.unit }}</small>{% endif %}</div><div class="lab">{{ c.lab }}</div><div class="sub">{{ c.sub }}</div></div>
+    {% endfor %}
+  </div>
+  <figure><img src="{{ fig_session }}" alt=""><figcaption>{{ L.cap_session }}</figcaption></figure>
+</section>
+{% endif %}
+
+<section>
+  <div class="titre-section">{{ outlined_number(n + (2 if session else 1)) | safe }}<span class="triangle"></span><h2>{{ L.method }}</h2><span class="filet"></span></div>
+  <div class="methode">{% for p in method %}<p>{{ p | safe }}</p>{% endfor %}</div>
+  <ul class="refs">{% for r in references %}<li>{{ r }}</li>{% endfor %}</ul>
+</section>
+{% endblock %}

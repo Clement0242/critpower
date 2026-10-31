@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "critpower"
+version = "0.1.0"
+description = "Critical power and critical speed from lab tests or field data (five models, 3-min all-out test, mean-maximal curves, W' balance) with designed PDF reports."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Clément Verdier" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "scipy>=1.10"]
+keywords = ["sport science", "critical power", "critical speed", "W' balance", "endurance", "GPS"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+report = ["matplotlib>=3.7", "jinja2>=3.1", "weasyprint>=60"]
+test = ["pytest>=7", "matplotlib>=3.7", "jinja2>=3.1", "weasyprint>=60"]
+
+[project.urls]
+Homepage = "https://github.com/Clement0242/critpower"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/critpower"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
